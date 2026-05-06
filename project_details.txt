@@ -1,0 +1,38 @@
+# Task 05: Nexus Social - Social Media Platform
+=============================================
+
+1. PROJECT OVERVIEW
+------------------
+Nexus Social is a comprehensive full-stack social networking application. It allows users to build communities by sharing text and image-based posts, interacting with others through likes and comments, and managing personal profiles.
+
+2. TECHNOLOGIES USED
+--------------------
+- Backend: Node.js + Express.js
+- Database: SQLite (Relational database for Users, Posts, Likes, and Comments)
+- Authentication: JSON Web Tokens (JWT) + bcrypt password hashing
+- File Handling: Multer (for image/media uploads)
+- Frontend: Vanilla JavaScript, HTML5, CSS3 (Nexus Dark Mode Design System)
+
+3. KEY FEATURES
+---------------
+- Dynamic Feed: A real-time updating list of posts from all users.
+- Multimedia Posts: Support for text-based content and image uploads.
+- Interactions: Dynamic Like system and nested Commenting system.
+- Notification System: Real-time alerts for likes, comments, and new followers.
+- Social Graph: Full Follow/Unfollow system with follower counts.
+- Profile Exploration: Click any user to view their personal profile and post history.
+- Responsive Design: A professional three-column layout (Navigation, Feed, Trending).
+
+4. HOW TO RUN
+-------------
+1. Navigate to: `cd task-05-social-media`
+2. Install dependencies: `npm install`
+3. Start the application: `npm start`
+4. Access at: `http://localhost:3005`
+
+5. DATABASE SCHEMA
+------------------
+- users: (id, username, email, password, avatar, bio)
+- posts: (id, user_id, content, image_url, tags, created_at)
+- likes: (id, user_id, post_id) - enforces unique user-post combinations.
+- comments: (id, user_id, post_id, content, created_at)
