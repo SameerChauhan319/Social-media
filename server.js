@@ -20,6 +20,17 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Manual CORS Middleware
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    if (req.method === 'OPTIONS') {
+        res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
+        return res.status(200).json({});
+    }
+    next();
+});
+
 // Storage for "uploads"
 const storage = multer.diskStorage({
     destination: './uploads/',
@@ -154,10 +165,24 @@ app.post('/api/register', async (req, res) => {
 
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
+    console.log(`[SOCIAL] Login attempt for: ${username}`);
     db.get("SELECT * FROM users WHERE username = ?", [username], async (err, user) => {
-        if (err || !user) return res.status(400).json({ error: 'User not found' });
+        if (err) {
+            console.error('[SOCIAL] Database error during login:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        if (!user) {
+            console.warn(`[SOCIAL] Login failed: User ${username} not found`);
+            return res.status(400).json({ error: 'User not found' });
+        }
+
         const match = await bcrypt.compare(password, user.password);
-        if (!match) return res.status(400).json({ error: 'Invalid password' });
+        if (!match) {
+            console.warn(`[SOCIAL] Login failed: Invalid password for ${username}`);
+            return res.status(400).json({ error: 'Invalid password' });
+        }
+
+        console.log(`[SOCIAL] Login successful: ${username}`);
         const token = jwt.sign({ id: user.id, username: user.username, avatar: user.avatar }, SECRET_KEY);
         res.json({ token, user: { id: user.id, username: user.username, avatar: user.avatar } });
     });

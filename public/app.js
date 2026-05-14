@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const followBtn = document.getElementById('follow-btn');
     const profilePosts = document.getElementById('profile-posts');
 
+    // --- API Configuration ---
+    // Task 05 backend is usually on port 3006
+    const API_BASE_URL = (window.location.port === '5500' || window.location.port === '5506') ? 'http://localhost:3006' : '';
+
     // State
     let token = localStorage.getItem('social_token');
     let user = JSON.parse(localStorage.getItem('social_user'));
@@ -68,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         exploreView.classList.remove('hidden');
         feedHeader.textContent = 'Explore Trending';
         
-        const res = await fetch('/api/explore');
+        const res = await fetch(`${API_BASE_URL}/api/explore`);
         const posts = await res.json();
         exploreView.innerHTML = '';
         posts.forEach(p => exploreView.appendChild(createPostElement(p)));
@@ -79,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         notificationsContainer.classList.remove('hidden');
         feedHeader.textContent = 'Notifications';
         
-        const res = await fetch('/api/notifications', {
+        const res = await fetch(`${API_BASE_URL}/api/notifications`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const notifications = await res.json();
@@ -116,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         profileView.classList.remove('hidden');
         feedHeader.textContent = `@${username.toLowerCase()}`;
 
-        const res = await fetch(`/api/users/${username}`);
+        const res = await fetch(`${API_BASE_URL}/api/users/${username}`);
         const profileData = await res.json();
         
         profileAvatar.src = profileData.avatar;
@@ -136,14 +140,14 @@ document.addEventListener('DOMContentLoaded', () => {
             followBtn.onclick = () => followUser(profileData.id);
         }
 
-        const postsRes = await fetch(`/api/users/${username}/posts`);
+        const postsRes = await fetch(`${API_BASE_URL}/api/users/${username}/posts`);
         const posts = await postsRes.json();
         profilePosts.innerHTML = '';
         posts.forEach(post => profilePosts.appendChild(createPostElement(post)));
     }
 
     async function followUser(userId) {
-        const res = await fetch(`/api/users/${userId}/follow`, {
+        const res = await fetch(`${API_BASE_URL}/api/users/${userId}/follow`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -160,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchSuggestions() {
-        const res = await fetch('/api/suggestions', {
+        const res = await fetch(`${API_BASE_URL}/api/suggestions`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const suggestions = await res.json();
@@ -182,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchTrendingUsers() {
-        const res = await fetch('/api/trending-users');
+        const res = await fetch(`${API_BASE_URL}/api/trending-users`);
         const trending = await res.json();
         trendingUsersList.innerHTML = '';
         trending.forEach(u => {
@@ -232,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showUserProfile,
         followUser,
         likePost: async (postId, el) => {
-            const res = await fetch(`/api/posts/${postId}/like`, {
+            const res = await fetch(`${API_BASE_URL}/api/posts/${postId}/like`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -247,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         openComments: async (postId) => {
             activePostId = postId;
             document.getElementById('comments-modal').classList.remove('hidden');
-            const res = await fetch(`/api/posts/${postId}/comments`);
+            const res = await fetch(`${API_BASE_URL}/api/posts/${postId}/comments`);
             const comments = await res.json();
             const list = document.getElementById('comments-list');
             list.innerHTML = '';
@@ -266,13 +270,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loginForm.onsubmit = async (e) => {
         e.preventDefault();
-        const res = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: loginForm[0].value, password: loginForm[1].value })
-        });
-        const data = await res.json();
-        if (res.ok) { token = data.token; user = data.user; localStorage.setItem('social_token', token); localStorage.setItem('social_user', JSON.stringify(user)); showMain(); }
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: loginForm[0].value, password: loginForm[1].value })
+            });
+            const data = await res.json();
+            if (res.ok) { 
+                token = data.token; 
+                user = data.user; 
+                localStorage.setItem('social_token', token); 
+                localStorage.setItem('social_user', JSON.stringify(user)); 
+                showMain(); 
+            } else {
+                alert(data.error || 'Login failed');
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            alert('Connection error. Is the backend server running on port 3006?');
+        }
     };
 
     document.getElementById('logout-btn').onclick = () => { localStorage.clear(); location.reload(); };
@@ -288,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const res = await fetch(`/api/search?q=${q}`);
+        const res = await fetch(`${API_BASE_URL}/api/search?q=${q}`);
         const data = await res.json();
         renderSearchResults(data);
     });
@@ -330,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const bio = document.getElementById('edit-bio').value;
         const avatar = document.getElementById('edit-avatar').value;
 
-        const res = await fetch('/api/profile/update', {
+        const res = await fetch(`${API_BASE_URL}/api/profile/update`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -365,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchPosts() {
-        const res = await fetch('/api/posts');
+        const res = await fetch(`${API_BASE_URL}/api/posts`);
         const posts = await res.json();
         postsContainer.innerHTML = '';
         posts.forEach(p => postsContainer.appendChild(createPostElement(p)));
@@ -378,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fd.append('content', content);
         if (img) fd.append('image', img);
         
-        await fetch('/api/posts', {
+        await fetch(`${API_BASE_URL}/api/posts`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
             body: fd
@@ -390,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('submit-comment').onclick = async () => {
         const content = document.getElementById('new-comment').value;
-        await fetch(`/api/posts/${activePostId}/comments`, {
+        await fetch(`${API_BASE_URL}/api/posts/${activePostId}/comments`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ content })
