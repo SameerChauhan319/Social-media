@@ -28,7 +28,11 @@ Nexus Social is a comprehensive full-stack social networking application. It all
 1. Navigate to: `cd task-05-social-media`
 2. Install dependencies: `npm install`
 3. Start the application: `npm start`
-4. Access at: `http://localhost:3005`
+4. Access at: `http://localhost:3006` (or `http://localhost:3005`)
+
+Default Test Accounts:
+- Username: `sameer chau` | Password: `sameer`
+- Username: `test` | Password: `test`
 
 5. DATABASE SCHEMA
 ------------------

@@ -121,14 +121,15 @@ function initializeDatabase() {
 
 function seedDatabase() {
     console.log('Seeding initial developer accounts...');
-    const adminPass = bcrypt.hashSync('admin123', 10);
+    const sameerPass = bcrypt.hashSync('sameer', 10);
+    const testPass = bcrypt.hashSync('test', 10);
     
     // INSERT OR IGNORE to prevent duplicates
     db.run("INSERT OR IGNORE INTO users (id, username, email, password, avatar, bio) VALUES (?, ?, ?, ?, ?, ?)",
-        [1, 'ProdigyAdmin', 'admin@prodigy.com', adminPass, 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin', 'Official Prodigy Infotech developer account.'], () => {
+        [1, 'sameer chau', 'sameer@prodigy.com', sameerPass, 'https://api.dicebear.com/7.x/avataaars/svg?seed=sameer', 'Full-stack developer.'], () => {
         
         db.run("INSERT OR IGNORE INTO users (id, username, email, password, avatar, bio) VALUES (?, ?, ?, ?, ?, ?)",
-            [2, 'SarahDev', 'sarah@test.com', adminPass, 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah', 'Full-stack developer and AI enthusiast.'], () => {
+            [2, 'test', 'test@test.com', testPass, 'https://api.dicebear.com/7.x/avataaars/svg?seed=test', 'Test account.'], () => {
             
             // Check if posts exist
             db.get("SELECT COUNT(*) as count FROM posts", (err, row) => {
